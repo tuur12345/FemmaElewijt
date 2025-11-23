@@ -2,8 +2,12 @@ import { getActivities } from '@/actions/activities'
 import ActivityCard from '@/components/ActivityCard'
 import { Calendar } from 'lucide-react'
 
+import { Database } from '@/types/database.types'
+
+type Activity = Database['public']['Tables']['activities']['Row']
+
 export default async function ActivitiesPage() {
-    const activities = await getActivities()
+    const activities = await getActivities() as Activity[]
 
     // Group activities by month
     const activitiesByMonth = activities.reduce((acc, activity) => {
@@ -14,7 +18,7 @@ export default async function ActivitiesPage() {
         }
         acc[monthKey].push(activity)
         return acc
-    }, {} as Record<string, typeof activities>)
+    }, {} as Record<string, Activity[]>)
 
     return (
         <div className="space-y-8">
