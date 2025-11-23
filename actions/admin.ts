@@ -147,3 +147,35 @@ export async function uploadActivityPhotos(formData: FormData) {
 
     return { success: true, count: successCount, errors }
 }
+
+export async function saveActivityPhotos(activityId: string, urls: string[]) {
+    const supabase = await createClient()
+
+    // Check admin
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // Verify admin role (double check)
+    const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (profile?.role !== 'admin') return { error: 'Unauthorized' }
+
+    const records = urls.map(url => ({
+        activity_id: activityId,
+        url
+    }))
+
+    const { error } = await supabase
+        .from('activity_photos')
+        .insert(records)
+
+    if (error) return { error: error.message }
+
+    revalidatePath(`/galerij/${activityId}`)
+    revalidatePath('/galerij')
+    return { success: true }
+}

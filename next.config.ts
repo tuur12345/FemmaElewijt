@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '50mb',
     },
+    // @ts-ignore
+    middlewareClientMaxBodySize: '50mb',
   },
 };
 
