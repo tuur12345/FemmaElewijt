@@ -78,7 +78,9 @@ export default function LoginPage() {
                 </div>
 
                 <div className="mt-6">
-                    <form action={signInWithGoogle}>
+                    <form action={async () => {
+                        await signInWithGoogle()
+                    }}>
                         <Button variant="outline" type="submit" className="w-full text-lg py-6 border-gray-300">
                             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                                 <path

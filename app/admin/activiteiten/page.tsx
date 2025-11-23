@@ -44,7 +44,10 @@ export default async function AdminActivitiesPage() {
                                             <Calendar className="w-4 h-4 text-blue-600" />
                                         </Button>
                                     </Link>
-                                    <form action={deleteActivity.bind(null, activity.id)}>
+                                    <form action={async () => {
+                                        'use server'
+                                        await deleteActivity(activity.id)
+                                    }}>
                                         <Button variant="ghost" size="icon" className="hover:bg-red-50" title="Verwijderen">
                                             <Trash2 className="w-4 h-4 text-red-600" />
                                         </Button>
