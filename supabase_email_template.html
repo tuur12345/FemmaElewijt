@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bevestig je inschrijving</title>
+</head>
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #fdf2f8; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; margin-top: 40px; margin-bottom: 40px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    
+    <!-- Header -->
+    <div style="background-color: #be185d; padding: 30px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">Femma Elewijt</h1>
+    </div>
+
+    <!-- Content -->
+    <div style="padding: 40px 30px; text-align: center;">
+      <h2 style="color: #1f2937; margin-top: 0; margin-bottom: 20px; font-size: 20px;">Welkom!</h2>
+      <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+        Bedankt voor je inschrijving bij Femma Elewijt. We zijn blij dat je erbij bent!<br>
+        Klik op de onderstaande knop om je e-mailadres te bevestigen en je account te activeren.
+      </p>
+
+      <!-- Button -->
+      <a href="{{ .ConfirmationURL }}" style="display: inline-block; background-color: #be185d; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 30px;">
+        Bevestig E-mail
+      </a>
+
+      <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
+        Of kopieer en plak deze link in je browser:<br>
+        <a href="{{ .ConfirmationURL }}" style="color: #be185d; word-break: break-all;">{{ .ConfirmationURL }}</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+        &copy; 2024 Femma Elewijt. Alle rechten voorbehouden.<br>
+        Als je dit niet hebt aangevraagd, kun je deze e-mail negeren.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
