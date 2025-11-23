@@ -67,7 +67,10 @@ export default async function AccountPage() {
                                 <Link href={`/activiteiten/${activity.id}`}>
                                     <Button variant="outline" className="w-full">Details</Button>
                                 </Link>
-                                <form action={unregisterFromActivity.bind(null, activity.id)}>
+                                <form action={async () => {
+                                    'use server'
+                                    await unregisterFromActivity(activity.id)
+                                }}>
                                     <Button variant="destructive" size="sm" className="w-full bg-red-100 text-red-700 hover:bg-red-200 border-none">
                                         Uitschrijven
                                     </Button>

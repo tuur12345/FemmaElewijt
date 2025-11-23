@@ -128,7 +128,10 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
                             <div className="space-y-3">
                                 {user ? (
                                     isRegistered ? (
-                                        <form action={unregisterFromActivity.bind(null, activity.id)}>
+                                        <form action={async () => {
+                                            'use server'
+                                            await unregisterFromActivity(activity.id)
+                                        }}>
                                             <Button variant="destructive" className="w-full text-lg py-6" type="submit">
                                                 Uitschrijven
                                             </Button>
@@ -138,7 +141,10 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
                                             Volzet
                                         </Button>
                                     ) : (
-                                        <form action={registerForActivity.bind(null, activity.id)}>
+                                        <form action={async () => {
+                                            'use server'
+                                            await registerForActivity(activity.id)
+                                        }}>
                                             <Button className="w-full text-lg py-6" type="submit">
                                                 Inschrijven
                                             </Button>
