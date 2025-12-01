@@ -5,6 +5,7 @@ import { Calendar, Clock, MapPin, Euro, Users, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { registerForActivity, unregisterFromActivity, getRegistrationStatus } from '@/actions/registrations'
+import ManagerControls from '@/components/ManagerControls'
 
 export default async function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -64,6 +65,9 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
                 <div className="p-8">
                     <div className="grid md:grid-cols-3 gap-8">
                         <div className="md:col-span-2 space-y-6">
+                            {user && (activity.manager_id === user.id || user.role === 'admin') && (
+                                <ManagerControls activityId={activity.id} activityTitle={activity.title} />
+                            )}
                             <div className="prose prose-lg max-w-none text-gray-700">
                                 <p className="whitespace-pre-wrap">{activity.description}</p>
                             </div>

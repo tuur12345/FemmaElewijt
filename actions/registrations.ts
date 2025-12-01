@@ -145,3 +145,45 @@ export async function getUserRegistrations() {
         registration_date: reg.created_at
     }))
 }
+
+export async function getRegistrationsForActivity(activityId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) throw new Error('Unauthorized')
+
+    // Check if manager or admin
+    const { data: activity } = await supabase
+        .from('activities')
+        .select('manager_id')
+        .eq('id', activityId)
+        .single()
+
+    const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (activity?.manager_id !== user.id && profile?.role !== 'admin') {
+        throw new Error('Unauthorized')
+    }
+
+    const { data } = await supabase
+        .from('registrations')
+        .select(`
+            created_at,
+            users (
+                name,
+                email
+            )
+        `)
+        .eq('activity_id', activityId)
+        .order('created_at', { ascending: false })
+
+    return data?.map((reg: any) => ({
+        name: reg.users?.name,
+        email: reg.users?.email,
+        created_at: reg.created_at
+    })) || []
+}

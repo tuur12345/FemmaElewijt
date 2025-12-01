@@ -1,11 +1,13 @@
 'use client'
 
-import { createActivity } from '@/actions/admin'
+import { createActivity, getUsers } from '@/actions/admin'
 import { Button } from '@/components/ui/Button'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
+import CoverImageUploader from '@/components/admin/CoverImageUploader'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useFormStatus } from 'react-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function SubmitButton() {
     const { pending } = useFormStatus()
@@ -18,9 +20,23 @@ function SubmitButton() {
 
 export default function CreateActivityPage() {
     const [error, setError] = useState<string | null>(null)
+    const [users, setUsers] = useState<{ id: string, name: string | null, email: string }[]>([])
+    const [selectedManager, setSelectedManager] = useState("")
+    const [coverImageUrl, setCoverImageUrl] = useState("")
+
+    useEffect(() => {
+        getUsers().then(setUsers)
+    }, [])
 
     async function handleSubmit(formData: FormData) {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
         setError(null)
+        if (selectedManager) {
+            formData.append('manager_id', selectedManager)
+        }
+        if (coverImageUrl) {
+            formData.append('cover_image_url', coverImageUrl)
+        }
         const result = await createActivity(formData)
         if (result?.error) {
             setError(result.error)
@@ -75,9 +91,21 @@ export default function CreateActivityPage() {
                 </div>
 
                 <div>
+                    <label className="block font-medium text-gray-700 mb-2">Beheerder toewijzen (optioneel)</label>
+                    <SearchableSelect
+                        options={users.map(u => ({ label: u.name || u.email, value: u.id }))}
+                        value={selectedManager}
+                        onChange={setSelectedManager}
+                        placeholder="Selecteer een beheerder..."
+                        searchPlaceholder="Zoek op naam..."
+                    />
+                    <p className="text-sm text-gray-500 mt-1">Deze gebruiker kan de inschrijvingen zien en de activiteit bewerken.</p>
+                </div>
+
+                <div>
                     <label className="block font-medium text-gray-700 mb-2">Cover Afbeelding</label>
-                    <input type="file" name="cover_image" accept="image/*" className="w-full p-3 border rounded-lg" />
-                    <p className="text-sm text-gray-500 mt-1">Wordt automatisch gecomprimeerd.</p>
+                    <CoverImageUploader onUploadComplete={setCoverImageUrl} />
+                    <input type="hidden" name="cover_image_url" value={coverImageUrl} />
                 </div>
 
                 {error && (

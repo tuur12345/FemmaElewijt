@@ -19,6 +19,7 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null)
 
     async function handleSubmit(formData: FormData) {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
         setError(null)
         const result = await login(formData)
         if (result?.error) {

@@ -56,7 +56,21 @@ export async function signout() {
 
 export async function signInWithGoogle() {
     const supabase = await createClient()
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    let origin = process.env.NEXT_PUBLIC_SITE_URL
+
+    if (!origin && process.env.NEXT_PUBLIC_VERCEL_URL) {
+        origin = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    }
+
+    if (!origin && process.env.VERCEL_URL) {
+        origin = `https://${process.env.VERCEL_URL}`
+    }
+
+    if (!origin) {
+        origin = 'http://localhost:3000'
+    }
+
+    console.log('SignInWithGoogle Origin:', origin) // Debug log
 
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

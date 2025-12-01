@@ -20,6 +20,7 @@ export default function SignupPage() {
     const [success, setSuccess] = useState(false)
 
     async function handleSubmit(formData: FormData) {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
         setError(null)
         const result = await signup(formData)
         if (result?.error) {

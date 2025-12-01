@@ -2,8 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, User } from 'lucide-react'
-import FontSizeToggle from './ui/FontSizeToggle'
+import { Menu, X, User as UserIcon } from "lucide-react";
 import { Button } from './ui/Button'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -48,13 +47,12 @@ export default function Navbar({ user }: { user: any }) {
 
                     {/* Right Side: Font Toggle & Auth */}
                     <div className="hidden md:flex items-center space-x-4">
-                        <FontSizeToggle />
 
                         {user ? (
                             <div className="flex items-center gap-4 ml-4">
                                 <Link href="/account">
                                     <Button variant="secondary" size="sm" className="gap-2">
-                                        <User size={18} />
+                                        <UserIcon size={18} />
                                         Mijn Account
                                     </Button>
                                 </Link>
@@ -80,7 +78,6 @@ export default function Navbar({ user }: { user: any }) {
 
                     {/* Mobile Menu Button */}
                     <div className="md:hidden flex items-center gap-4">
-                        <FontSizeToggle />
                         <button
                             onClick={() => setIsOpen(!isOpen)}
                             className="p-2 rounded-md hover:bg-pink-600 transition-colors"
@@ -111,7 +108,7 @@ export default function Navbar({ user }: { user: any }) {
                                 <div className="space-y-3">
                                     <Link href="/account" onClick={() => setIsOpen(false)}>
                                         <Button variant="secondary" className="w-full justify-start gap-2 text-lg h-12">
-                                            <User /> Mijn Account
+                                            <UserIcon /> Mijn Account
                                         </Button>
                                     </Link>
                                     {user.role === 'admin' && (

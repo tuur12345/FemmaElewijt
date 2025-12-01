@@ -3,7 +3,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import sharp from 'sharp'
 
 // --- ACTIVITIES ---
 
@@ -23,38 +22,8 @@ export async function createActivity(formData: FormData) {
     const location = formData.get('location') as string
     const price_text = formData.get('price_text') as string
     const max_participants = formData.get('max_participants') ? parseInt(formData.get('max_participants') as string) : null
-
-    // Handle Cover Image
-    const coverImage = formData.get('cover_image') as File
-    let cover_image_url = null
-
-    if (coverImage && coverImage.size > 0) {
-        const buffer = Buffer.from(await coverImage.arrayBuffer())
-        // Compress image
-        const compressedBuffer = await sharp(buffer)
-            .resize(1200, 800, { fit: 'cover', withoutEnlargement: true })
-            .jpeg({ quality: 80 })
-            .toBuffer()
-
-        const fileName = `covers/${Date.now()}-${coverImage.name.replace(/[^a-zA-Z0-9.]/g, '')}`
-
-        const { error: uploadError } = await supabase.storage
-            .from('activity_covers')
-            .upload(fileName, compressedBuffer, {
-                contentType: 'image/jpeg',
-                upsert: true
-            })
-
-        if (uploadError) {
-            return { error: 'Upload failed: ' + uploadError.message }
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-            .from('activity_covers')
-            .getPublicUrl(fileName)
-
-        cover_image_url = publicUrl
-    }
+    const manager_id = formData.get('manager_id') as string || null
+    const cover_image_url = formData.get('cover_image_url') as string || null
 
     const { error } = await supabase
         .from('activities')
@@ -66,7 +35,8 @@ export async function createActivity(formData: FormData) {
             location,
             price_text,
             max_participants,
-            cover_image_url
+            cover_image_url,
+            manager_id
         })
 
     if (error) {
@@ -106,18 +76,12 @@ export async function uploadActivityPhotos(formData: FormData) {
         if (file.size === 0) continue
 
         try {
-            const buffer = Buffer.from(await file.arrayBuffer())
-            // Compress
-            const compressedBuffer = await sharp(buffer)
-                .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
-                .jpeg({ quality: 80 })
-                .toBuffer()
-
+            // Upload directly without compression
             const fileName = `photos/${activityId}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
 
             const { error: uploadError } = await supabase.storage
                 .from('activity_photos')
-                .upload(fileName, compressedBuffer, {
+                .upload(fileName, file, {
                     contentType: 'image/jpeg'
                 })
 
@@ -178,4 +142,100 @@ export async function saveActivityPhotos(activityId: string, urls: string[]) {
     revalidatePath(`/galerij/${activityId}`)
     revalidatePath('/galerij')
     return { success: true }
+}
+
+export async function getUsers() {
+    const supabase = await createClient()
+
+    // Check admin
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    // Verify admin role
+    const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (profile?.role !== 'admin') return []
+
+    const { data: users } = await supabase
+        .from('users')
+        .select('id, name, email')
+        .order('name')
+
+    return users || []
+}
+
+export async function updateActivity(id: string, formData: FormData) {
+    const supabase = await createClient()
+
+    // Check auth
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // Check permissions (manager or admin)
+    const { data: activity } = await supabase
+        .from('activities')
+        .select('manager_id')
+        .eq('id', id)
+        .single()
+
+    const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (activity?.manager_id !== user.id && profile?.role !== 'admin') {
+        return { error: 'Unauthorized' }
+    }
+
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string
+    const date = formData.get('date') as string
+    const start_time = formData.get('start_time') as string
+    const location = formData.get('location') as string
+    const price_text = formData.get('price_text') as string
+    const max_participants = formData.get('max_participants') ? parseInt(formData.get('max_participants') as string) : null
+    const manager_id = formData.get('manager_id') as string || null
+    const cover_image_url = formData.get('cover_image_url') as string || null
+
+    const updateData: any = {
+        title,
+        description,
+        date,
+        start_time,
+        location,
+        price_text,
+        max_participants,
+        manager_id,
+        updated_at: new Date().toISOString()
+    }
+
+    if (cover_image_url) {
+        updateData.cover_image_url = cover_image_url
+    }
+
+    const { error } = await supabase
+        .from('activities')
+        .update(updateData)
+        .eq('id', id)
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath(`/activiteiten/${id}`)
+    revalidatePath('/admin/activiteiten')
+    revalidatePath('/activiteiten')
+    revalidatePath('/')
+
+    // Redirect based on role
+    if (profile?.role === 'admin') {
+        redirect('/admin/activiteiten')
+    } else {
+        redirect(`/activiteiten/${id}`)
+    }
 }

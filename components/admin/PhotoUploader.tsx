@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Upload, X, Loader2 } from 'lucide-react'
-import imageCompression from 'browser-image-compression'
 import { saveActivityPhotos } from '@/actions/admin'
 import { useRouter } from 'next/navigation'
 
@@ -39,24 +38,15 @@ export default function PhotoUploader({ activities }: { activities: any[] }) {
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i]
-                setProgress(`Verwerken foto ${i + 1} van ${files.length}...`)
-
-                // Compress
-                const options = {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 1920,
-                    useWebWorker: true
-                }
+                setProgress(`Uploaden foto ${i + 1} van ${files.length}...`)
 
                 try {
-                    const compressedFile = await imageCompression(file, options)
-
-                    // Upload to Supabase
-                    const fileName = `photos/${selectedActivityId}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
+                    // Upload to Supabase directly (no compression)
+                    const fileName = `photos/${selectedActivityId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${file.name.split('.').pop()}`
 
                     const { error: uploadError } = await supabase.storage
                         .from('activity_photos')
-                        .upload(fileName, compressedFile)
+                        .upload(fileName, file)
 
                     if (uploadError) throw uploadError
 

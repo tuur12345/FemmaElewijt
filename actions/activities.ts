@@ -22,7 +22,7 @@ export async function getActivity(id: string) {
     const supabase = await createClient()
     const { data, error } = await supabase
         .from('activities')
-        .select('*')
+        .select('*, manager_id')
         .eq('id', id)
         .single()
 
